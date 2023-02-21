@@ -3,3 +3,7 @@ clipboard
 openai
 pandas
 streamlit
+nltk
+textblob
+spacy
+gensim
