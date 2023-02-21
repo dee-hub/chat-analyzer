@@ -63,8 +63,8 @@ with col1:
     def import_chat(file):
     # Read the file
         #with open(file, 'r', encoding='utf-8') as f:
-        lines = file.readlines()
-
+        lines = file.read().decode('utf-8').splitlines()
+        #lines = file.readlines()
         # Extract the data using regular expressions
         data = []
         for line in lines:
@@ -91,8 +91,7 @@ with col2:
 # creating a single-element container
     if click:
         if uploaded_file is not None:
-            bytes_data = uploaded_file.getvalue()
-            data = import_chat(bytes_data)
+            data = import_chat(uploaded_file)
             st.write(data)
             data['Author'] = data['Author'].str.replace('[^\w\s]+|\s+', '', regex=True)
             data['Author'] = data['Author'].astype(str)
