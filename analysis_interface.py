@@ -8,7 +8,6 @@ import numpy as np
 import gensim.corpora as corpora
 import gensim
 import pyLDAvis.gensim_models
-import pickle 
 import pyLDAvis
 import os
 from gensim.utils import simple_preprocess
@@ -16,14 +15,12 @@ import nltk
 nltk.download('stopwords')
 from nltk.corpus import stopwords
 from textblob import TextBlob
-import sys
-import tweepy
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import os
 import nltk
-nltk.download('vader_lexicon')
+#nltk.download('vader_lexicon')
 #import pycountry
 import re
 import string
