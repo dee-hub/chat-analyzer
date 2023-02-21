@@ -91,7 +91,7 @@ with col2:
 # creating a single-element container
     if click:
         if uploaded_file is not None:
-            data = import_chat(uploaded_file.name)
+            data = import_chat(uploaded_file)
             st.write(data)
             data['Author'] = data['Author'].str.replace('[^\w\s]+|\s+', '', regex=True)
             data['Author'] = data['Author'].astype(str)
