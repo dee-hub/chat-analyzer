@@ -62,8 +62,8 @@ with col1:
     click = st.button('Analyse')
     def import_chat(file):
     # Read the file
-        with open(file, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
+        #with open(file, 'r', encoding='utf-8') as f:
+        lines = file.readlines()
 
         # Extract the data using regular expressions
         data = []
