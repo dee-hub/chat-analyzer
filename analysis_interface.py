@@ -58,7 +58,7 @@ st.markdown("Deep Exploratory Chat Analysis")
 col1, col2= st.columns([4, 6])
 # top-level filters
 with col1:
-    uploaded_file = st.file_uploader("Uploaded your exported WhatsApp Chat File")
+    uploaded_file = st.file_uploader("Uploaded your exported WhatsApp Chat File", key="files")
     click = st.button('Analyse')
     def import_chat(file):
     # Read the file
