@@ -238,7 +238,7 @@ def percentage_author_contribution(data, selected_author):
                                  values=[selected_author_percentage, 100 - selected_author_percentage],
                                  hole=0.5)])
     
-    return st.plotly_chart(fig, use_container_width=True)
+    return st.plotly_chart(fig, fit_container_width=True)
 
 def topic_modelling(data):
     corpus = ' '.join(data['Message'])
