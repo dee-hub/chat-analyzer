@@ -244,7 +244,7 @@ def percentage_author_contribution(data, selected_author):
     
     return st.plotly_chart(fig, use_container_width=True)
 
-def emotions_analysis(data, selected_author):
+def emotions_analysis_group(data, selected_author):
     df = data
     # Load pre-trained emotion classification model
     model_name = "cardiffnlp/twitter-roberta-base-emotion"
@@ -275,6 +275,36 @@ def emotions_analysis(data, selected_author):
     # Add title and subtitle
     fig.update_layout(title={'text': "Emotions of " + selected_author + " in WhatsApp Chat", 'y':0.9})
     return st.plotly_chart(fig, use_container_width=True)
+
+def sentiment_analysis_group(data, selected_author):
+# Load the dataset
+    df = data
+# Select the author for sentiment analysis
+# Filter the messages of the selected author
+    author_messages = df['Message'].tolist()
+# Initialize the Vader sentiment analyzer
+    analyzer = SentimentIntensityAnalyzer()
+# Compute the sentiment scores for each message
+    sentiment_scores = [analyzer.polarity_scores(message) for message in author_messages]
+# Compute the overall sentiment for the selected author
+    overall_sentiment = sum([score['compound'] for score in sentiment_scores]) / len(sentiment_scores)
+# Compute the percentage of positive, negative, and neutral messages
+    num_messages = len(sentiment_scores)
+    num_positive = len([score for score in sentiment_scores if score['compound'] > 0])
+    num_negative = len([score for score in sentiment_scores if score['compound'] < 0])
+    num_neutral = num_messages - num_positive - num_negative
+    positive_percentage = (num_positive / num_messages) * 100
+    negative_percentage = (num_negative / num_messages) * 100
+    neutral_percentage = (num_neutral / num_messages) * 100
+
+# Create a Plotly pie chart
+    labels = ['Positive', 'Negative', 'Neutral']
+    values = [positive_percentage, negative_percentage, neutral_percentage]
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=0.5)])
+    fig.update_layout(title={'text': f'Sentiment Analysis for {selected_author}', 'y':0.9})
+    # Show the plot
+    return st.plotly_chart(fig, use_container_width=True)
+
 ######################################Linguistic pattern extraction
 
 def word_frequency(data, selected_author):
@@ -429,8 +459,17 @@ if uploaded_file is not None:
 
         advanced_analysis = st.button('Advanced Analysis')
         if advanced_analysis:
+            st.header('Collocation Extraction')
+            st.write(f"<p style='font-size:15px'>Collocation is a linguistic term used to describe the co-occurrence of two or more words in a text that tend to appear together more often than would be expected by chance. Collocation extraction involves identifying such word combinations in a corpus of text.</p>", unsafe_allow_html=True)
             collocation_extraction(data)
-            emotions_analysis(data, add_selectbox)
+            st.header('Sentiment Analysis')
+            st.write(f"<p style='font-size:15px'>Sentiment analysis for Whatsapp Chats can reveal the emotional undertones of conversations and provide valuable insights into the feelings and attitudes of participants, enabling a better understanding of the dynamics of interpersonal relationships.</p>", unsafe_allow_html=True)
+            sentiment_analysis_group(data, selected_author)
+            download_data()
+            emotions_analysis_group(data, add_selectbox)
+            st.write(f"<p style='font-size:18px'>This analysis is based on {data1['Message'].count()} messages .</p>", unsafe_allow_html=True)
+                      
+            
     else:
         data1 = data.loc[data['Author'] == add_selectbox]    
         if data1['Message Character Count'].sum() > 1000:
