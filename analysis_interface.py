@@ -464,7 +464,7 @@ if uploaded_file is not None:
             collocation_extraction(data)
             st.header('Sentiment Analysis')
             st.write(f"<p style='font-size:15px'>Sentiment analysis for Whatsapp Chats can reveal the emotional undertones of conversations and provide valuable insights into the feelings and attitudes of participants, enabling a better understanding of the dynamics of interpersonal relationships.</p>", unsafe_allow_html=True)
-            sentiment_analysis_group(data, selected_author)
+            sentiment_analysis_group(data, add_selectbox)
             download_data()
             emotions_analysis_group(data, add_selectbox)
             st.write(f"<p style='font-size:18px'>This analysis is based on {data1['Message'].count()} messages .</p>", unsafe_allow_html=True)
