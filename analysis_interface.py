@@ -14,6 +14,7 @@ import os
 from gensim.utils import simple_preprocess
 import nltk
 nltk.download('stopwords')
+nltk.download('punkt')
 from nltk.corpus import stopwords
 from textblob import TextBlob
 import matplotlib.pyplot as plt
