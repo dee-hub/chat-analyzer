@@ -49,7 +49,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 st.set_page_config(
     page_title="Chatistics: Deep Exploratory Chat Analysis",
-    #page_icon="logo.png",
+    page_icon="📊",
     layout="wide",
 )
 
