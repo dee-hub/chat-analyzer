@@ -228,7 +228,8 @@ def collocation_extraction(data):
                       xaxis_title="Collocations",
                       yaxis_title="Frequency")
 
-    return st.plotly_chart(fig, fit_containter_width=True)
+    return st.plotly_chart(fig, use_containter_width=True)
+
 def percentage_author_contribution(data, selected_author):
 # Calculate the total number of messages
     total_messages = len(data)
