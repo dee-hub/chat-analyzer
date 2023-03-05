@@ -257,7 +257,7 @@ def emotions_analysis_group(data, selected_author):
     author_messages = df['Message'].tolist()
 # Predict the emotions for each message by the selected author
     emotions = []
-    with st.spinner('Performing deep emotion analysis'):
+    with st.spinner('Performing deep emotion analysis...'):
         for message in author_messages:
             inputs = tokenizer(message, padding=True, truncation=True, return_tensors="pt")
             outputs = model(**inputs)
@@ -403,7 +403,7 @@ def emotions_analysis(data, selected_author):
     author_messages = df[df['Author'] == selected_author]['Message'].tolist()
 # Predict the emotions for each message by the selected author
     emotions = []
-    with st.spinner('Performing deep emotion analysis'):
+    with st.spinner('Performing deep emotion analysis...'):
         for message in author_messages:
             inputs = tokenizer(message, padding=True, truncation=True, return_tensors="pt")
             outputs = model(**inputs)
