@@ -48,7 +48,7 @@ import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 st.set_page_config(
-    page_title="Chatistics: Deep Exploratory Chat Analysis",
+    page_title="Chatistics",
     page_icon="📊",
     layout="wide",
 )
