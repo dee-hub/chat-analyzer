@@ -15,6 +15,7 @@ from gensim.utils import simple_preprocess
 import nltk
 nltk.download('stopwords')
 nltk.download('punkt')
+nltk.download('vader_lexicon')
 from nltk.corpus import stopwords
 from textblob import TextBlob
 import matplotlib.pyplot as plt
@@ -238,7 +239,7 @@ def percentage_author_contribution(data, selected_author):
                                  values=[selected_author_percentage, 100 - selected_author_percentage],
                                  hole=0.5)])
     
-    return st.plotly_chart(fig, fit_container_width=True)
+    return st.plotly_chart(fig, use_container_width=True)
 
 def topic_modelling(data):
     corpus = ' '.join(data['Message'])
@@ -281,7 +282,7 @@ def word_frequency(data, selected_author):
 # Visualize the results using a bar chart
     fig = go.Figure(go.Bar(x=list(top_10_words.keys()), y=list(top_10_words.values())))
     fig.update_layout(title=f"Top 10 Words Used by {add_selectbox}")
-    return st.plotly_chart(fig, fit_container_width=True)
+    return st.plotly_chart(fig, use_container_width=True)
 
 def collocation_extraction_by_author(data, selected_author):
     corpus = ' '.join(data.loc[data['Author'] == selected_author]['Message'])
@@ -309,7 +310,7 @@ def collocation_extraction_by_author(data, selected_author):
     fig.update_layout(title=f"Top Collocations in WhatsApp Chat by {selected_author}",
                       xaxis_title="Collocations",
                       yaxis_title="Frequency")
-    return st.plotly_chart(fig, fit_container_width=True)
+    return st.plotly_chart(fig, use_container_width=True)
 
 def sentiment_analysis(data, selected_author):
 # Load the dataset
@@ -338,7 +339,7 @@ def sentiment_analysis(data, selected_author):
     fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=0.5)])
     fig.update_layout(title={'text': f'Sentiment Analysis for {selected_author}', 'y':0.9})
     # Show the plot
-    return st.plotly_chart(fig, fit_container_width=True)
+    return st.plotly_chart(fig, use_container_width=True)
 
 def emotions_analysis(data, selected_author):
     df = data
@@ -370,7 +371,7 @@ def emotions_analysis(data, selected_author):
 
     # Add title and subtitle
     fig.update_layout(title={'text': "Emotions of " + selected_author + " in WhatsApp Chat", 'y':0.9})
-    return st.plotly_chart(fig, fit_container_width=True)
+    return st.plotly_chart(fig, use_container_width=True)
 ########################################Function declarations finished#########################################
 uploaded_file = st.file_uploader("Upload your exported WhatsApp Chat File", key='files')
 #click = st.button('Analyse', key="click1")
