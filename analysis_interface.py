@@ -244,23 +244,37 @@ def percentage_author_contribution(data, selected_author):
     
     return st.plotly_chart(fig, use_container_width=True)
 
-def topic_modelling(data):
-    corpus = ' '.join(data['Message'])
-# Tokenize the corpus
-    tokens = nltk.word_tokenize(corpus)
-# Remove stopwords
-    stop_words = set(nltk.corpus.stopwords.words('english'))
-    tokens = [token for token in tokens if token.lower() not in stop_words]
-# Create a dictionary from the tokenized corpus
-    dictionary = corpora.Dictionary([tokens])
-# Create a bag-of-words representation of the corpus
-    corpus_bow = [dictionary.doc2bow(tokens)]
-# Train the LDA model
-    lda_model = models.LdaModel(corpus_bow, num_topics=5, id2word=dictionary, passes=10)
-# Print the top topics and their keywords
-    topics = lda_model.show_topics(num_topics=5, num_words=10)
-    for topic in topics:
-        st.write(topic)
+def emotions_analysis(data, selected_author):
+    df = data
+    # Load pre-trained emotion classification model
+    model_name = "cardiffnlp/twitter-roberta-base-emotion"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name)
+    # Define emotion labels
+    emotion_labels = ['anger', 'joy', 'optimism', 'sadness']
+    # Define the selected author
+    # Filter messages by selected author
+    author_messages = df['Message'].tolist()
+# Predict the emotions for each message by the selected author
+    emotions = []
+    with st.spinner('Performing deep emotion analysis'):
+        for message in author_messages:
+            inputs = tokenizer(message, padding=True, truncation=True, return_tensors="pt")
+            outputs = model(**inputs)
+            probs = torch.softmax(outputs.logits, dim=1).detach().numpy()[0]
+            predicted_emotion = emotion_labels[int(torch.argmax(outputs.logits))]
+            emotions.append(predicted_emotion)
+    st.success('Completed')
+# Compute the frequency of each emotion
+    freq_dict = {}
+    for emotion in emotions:
+        freq_dict[emotion] = freq_dict.get(emotion, 0) + 1
+    # Create a Pie chart with the emotions frequency
+    fig = go.Figure(data=[go.Pie(labels=list(freq_dict.keys()), values=list(freq_dict.values()), hole=0.5)])
+
+    # Add title and subtitle
+    fig.update_layout(title={'text': "Emotions of " + selected_author + " in WhatsApp Chat", 'y':0.9})
+    return st.plotly_chart(fig, use_container_width=True)
 ######################################Linguistic pattern extraction
 
 def word_frequency(data, selected_author):
@@ -416,7 +430,7 @@ if uploaded_file is not None:
         advanced_analysis = st.button('Advanced Analysis')
         if advanced_analysis:
             collocation_extraction(data)
-            topic_modelling(data)
+            emotions_analysis(data, add_selectbox)
     else:
         data1 = data.loc[data['Author'] == add_selectbox]    
         if data1['Message Character Count'].sum() > 1000:
