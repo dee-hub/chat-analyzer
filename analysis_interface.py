@@ -198,7 +198,8 @@ def line_by_hour(data):
     return st.plotly_chart(fig, use_container_width=True)
 
 def collocation_extraction(data):
-    df['Message'] = data['Message'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)))
+    df = data
+    df['Message'] = df['Message'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)))
     corpus = ' '.join(df['Message'])
 # Tokenize the corpus
     tokens = nltk.word_tokenize(corpus)
@@ -286,7 +287,8 @@ def word_frequency(data, selected_author):
     return st.plotly_chart(fig, use_container_width=True)
 
 def collocation_extraction_by_author(data, selected_author):
-    df['Message'] = data['Message'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)))
+    df = data
+    df['Message'] = df['Message'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)))
     corpus = ' '.join(df.loc[df['Author'] == selected_author]['Message'])
 # Tokenize the corpus
     tokens = nltk.word_tokenize(corpus)
