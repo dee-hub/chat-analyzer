@@ -23,7 +23,6 @@ import os
 from nltk.collocations import BigramAssocMeasures, BigramCollocationFinder
 import re
 import string
-from wordcloud import WordCloud, STOPWORDS
 from PIL import Image
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 #from langdetect import detect
