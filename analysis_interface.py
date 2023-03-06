@@ -61,15 +61,19 @@ st.markdown("Deep Exploratory Chat Analysis")
 
 @st.cache
 def import_chat(file):
-    with zipfile.ZipFile(file) as zip_file:
-        # Assume there is only one file in the zip archive
-        file_name = zip_file.namelist()[0]
-        with zip_file.open(file_name) as chat_file:
-            # Read the file
-            lines = io.TextIOWrapper(chat_file, encoding='utf-8').read().splitlines()
-    # Read the file
-    #lines = file.read().decode('utf-8').splitlines()
-
+    name = os.path.splitext(file.name)
+    name = name[1].replace(".", "")
+    if name == "zip":
+        with zipfile.ZipFile(file) as zip_file:
+            # Assume there is only one file in the zip archive
+            file_name = zip_file.namelist()[0]
+            with zip_file.open(file_name) as chat_file:
+                # Read the file
+                lines = io.TextIOWrapper(chat_file, encoding='utf-8').read().splitlines()
+        # Read the file
+    elif name == "txt":
+        lines = file.read().decode('utf-8').splitlines()
+    
     # Extract the data using regular expressions
     data = []
     for line in lines:
