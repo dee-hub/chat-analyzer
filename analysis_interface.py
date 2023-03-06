@@ -434,7 +434,7 @@ def emotions_analysis(data, selected_author):
     fig.update_layout(title={'text': "Emotions of " + selected_author + " in WhatsApp Chat", 'y':0.9})
     return st.plotly_chart(fig, use_container_width=True)
 ########################################Function declarations finished#########################################
-uploaded_file = st.file_uploader("Upload your exported WhatsApp Zip Chat File", key='files')
+uploaded_file = st.file_uploader("Upload your exported WhatsApp Zip or txt Chat File", key='files')
 #click = st.button('Analyse', key="click1")
 
 # creating a single-element container
