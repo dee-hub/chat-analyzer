@@ -606,5 +606,5 @@ if uploaded_file is not None:
                 sentiment_analysis(data, add_selectbox)
                 download_data()
                 emotions_analysis(data, add_selectbox)
-                st.write(f"<p style='font-size:13px'><i>Emotion analysis is a classification model and works better with long sentences. This analysis, was performed only on messages with at least 30 word count. </i></p>", unsafe_allow_html=True)
+                st.write(f"<p style='font-size:13px'><i>Emotion analysis is a classification model and works better with long sentences. This analysis, was performed only on messages with at least 30 words count. </i></p>", unsafe_allow_html=True)
         #st.write(f"<p style='font-size:20px'>😔 I am still working on personalized analysis, please check back </p>", unsafe_allow_html=True)
