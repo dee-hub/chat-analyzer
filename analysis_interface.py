@@ -81,6 +81,10 @@ def import_chat(file):
         match = re.findall(r'\[(\d{1,2}/\d{1,2}/\d{2,4},?\s+\d{1,2}:\d{2}:\d{2}\s*(?:AM|PM)?)\]\s+(.*?):\s+(.*)', line.strip())
         if match:
             data.append(match[0])
+        elif not match:
+            match = re.findall(r'(\d{1,2}/\d{1,2}/\d{2,4},?\s+\d{1,2}:\d{2}\s*(?:AM|PM)?)\s+-\s+(.*?):\s+(.*)', line.strip())
+            if match:
+                data.append(match[0])
     df = pd.DataFrame(data, columns=['DateTime', 'Author', 'Message'])
     df.drop([0, 1, 2], axis='index', inplace=True)
     df = df[~df['Message'].str.contains('omitted|deleted|changed group')]
@@ -92,7 +96,11 @@ def import_chat(file):
         try:
             date_time = pd.to_datetime(row['DateTime'], format='%m/%d/%y, %I:%M:%S %p')
         except ValueError:
-            date_time = pd.to_datetime(row['DateTime'], format='%d/%m/%Y, %H:%M:%S')
+            try:
+                date_time = pd.to_datetime(row['DateTime'], format='%d/%m/%Y, %H:%M:%S')
+            except ValueError:
+                date_time = pd.to_datetime(row['DateTime'], format='%m/%d/%y, %I:%M %p')
+
         row['Date'] = date_time.date()
         row['Time'] = date_time.time()
         valid_rows.append(row)
@@ -100,7 +108,8 @@ def import_chat(file):
     df['Message Character Count'] = df['Message'].apply(lambda x: len(x))
     df.reset_index(inplace=True, drop=True)
     return df
-
+def remove_numbers(s):
+    return re.sub(r'\d+', '', s)
 def plot_message(data):
     #data = import_chat(file)
 # Get the value counts for each author
@@ -189,16 +198,19 @@ def pie_chart(data):
 # Create a dataframe with the author and percentage data, including 'others'
     data = pd.DataFrame({'Author': list(top_authors.index) + ['Others'], 'Percentage': list(author_percentages) + [other_percentage]})
 # Create the plot using plotly.express
-    fig = px.pie(data, values='Percentage', names='Author',
+    fig = px.pie(data, values='Percentage', names='Author', hole=0.5,
                  title='Top 10 Authors by Character Count (including Others)')
     st.plotly_chart(fig, use_container_width=True)
 
 def line_by_hour(data):
     #data = character_count(data)
     try:
-        data['DateTime'] = pd.to_datetime(data['DateTime'], format='%m/%d/%y, %I:%M:%S %p')
+            data['DateTime'] = pd.to_datetime(data['DateTime'], format='%m/%d/%y, %I:%M:%S %p')
     except ValueError:
-        data['DateTime'] = pd.to_datetime(data['DateTime'], format='%d/%m/%Y, %H:%M:%S')
+        try:
+            data['DateTime'] = pd.to_datetime(data['DateTime'], format='%d/%m/%Y, %H:%M:%S')
+        except ValueError:
+            data['DateTime'] = pd.to_datetime(data['DateTime'], format='%m/%d/%y, %I:%M %p')
 # Group the messages by hour
     hourly_counts = data.groupby(data['DateTime'].dt.hour)['Message'].count().reset_index(name='Message Count')
     hourly_counts['DateTime'] = hourly_counts['DateTime'].map({0: '12AM', 1: '1AM', 2: '2AM', 3: '3AM', 4: '4AM', 5: '5AM',
@@ -212,6 +224,8 @@ def line_by_hour(data):
 def collocation_extraction(data):
     df = data
     df['Message'] = df['Message'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)))
+    df['Message'] = df['Message'].apply(remove_numbers)
+    df = df[df['Message'].apply(lambda x: len(x.split()) >= 4)]
     corpus = ' '.join(df['Message'])
 # Tokenize the corpus
     tokens = nltk.word_tokenize(corpus)
@@ -340,13 +354,83 @@ def word_frequency(data, selected_author):
 
 # Visualize the results using a bar chart
     fig = go.Figure(go.Bar(x=list(top_10_words.keys()), y=list(top_10_words.values())))
-    fig.update_layout(title=f"Top 10 Words Used by {add_selectbox}")
+    fig.update_layout(title=f"{add_selectbox} favourite words")
+    return st.plotly_chart(fig, use_container_width=True)
+
+def percentage_of_pidgin(data, selected_author):
+    # read the dataset into a pandas dataframe
+    df = data.copy()    
+    df = data[data['Author'] == selected_author]
+    # define the pidgin words you want to check for
+    pidgin_words = ["abi", "jare", "wahala", "oya", "gbas", "kpatakpata", "shakara", "yawa",'abeg',
+     'ashawo', 'baff', 'chop', 'correct', 'craze', 'dash', 'ehen',
+     'ehn', 'fada', 'gbedu', 'gbege', 'halla', 'kwashiokor', 'maga',
+      'mugu', 'oga', 'oyibo', 'shakara', 'shoki', 'sisi', 'tatafo',
+       'tokunbo', 'totori', 'wahala', 'waka', 'wetin', 'wuruwuru',
+        'yanga', 'yawa', 'yeye', 'zanga', 'zobo', 'na', 'dey', 'haba', 'comot', 'chop', 'vex', 'gree', 'na so', 'go slow',
+        'wan', 'wey', 'sha', 'sef', 'waka', 'na wa', 'kuku', 'belle', 'notin', 'ham', 'yu', 'u', 'nah', 'ah',
+        'e']
+    # initialize a counter for messages that contain at least two pidgin words
+    pidgin_count = 0    
+    # loop through each message and check for pidgin words
+    for message in df['Message']:
+        # convert message to lowercase to make the search case-insensitive
+        message_lower = str(message).lower()
+        # loop through each pidgin word and count if it appears in the message
+        word_count = 0
+        for word in pidgin_words:
+            if word in message_lower:
+                word_count += 1
+        # if at least two pidgin words are found, increment the count
+        if word_count >= 2:
+            pidgin_count += 1
+    # calculate the percentage of messages that contain at least two pidgin words
+    pidgin_percent = pidgin_count / len(df) * 100
+    # calculate the percentage of messages that do not contain at least two pidgin words
+    non_pidgin_percent = 100 - pidgin_percent
+    # create a pie chart showing the percentage of messages with at least two pidgin words
+    fig = go.Figure(data=[go.Pie(labels=['Messages with at least two pidgin words', 'Messages without at least two pidgin words'], 
+                                 values=[pidgin_percent, non_pidgin_percent], hole=0.5)])
+    st.subheader('Pidgin English Detection and Extraction')
+    st.write(f"<p style='font-size:15px'>Extracts the percentage of your conversation containing pidgin english. <i>Depends on a list of {len(pidgin_words)} words for accuracy</i></p>", unsafe_allow_html=True)
+    return st.plotly_chart(fig, use_container_width=True)
+
+def percentage_of_abbreviations(data, selected_author):
+    # read the dataset into a pandas dataframe
+    df = data.copy()    
+    df = data[data['Author'] == selected_author]
+    # define the pidgin words you want to check for
+    common_abbreviations = ['lol', 'brb', 'btw', 'idk', 'omg', 'jk', 'afk', 'gtg', 'wtf', 'lmao', 'rofl', 'ily', 'smh', 'imo', 'tbh', 'yolo', 'nsfw', 'ftw', 'imho', 'fyi', 'ppl', 'bff', 'afaik', 'gr8', 'thx', 'np', 'tmi', 'ikr', 'tgif', 'icymi', 'ywy', 'omw', 'b4', 'mcm', 'wcw', 'fml', 'idc', 'g2g', 'fomo', 'l8r', 'bae', 'tb', 'hmu', 'nsfl', 'afaic', 'nvm', 'wyd', 'ttyl', 'hbd', 'lmk', 'bday', 'ftfy', 'smfh', 'nbd', 'stfu', 'wbu', 'ygm', 'asap', 'idgaf', 'gg', 'omdb', 'imy', 'bbl', 'jic', 'nbd', 'pov', 'ty', 'idky', 'dnd', 'mfw', 'srsly', 'wru', 'lms', 'nbd', 'nm', 'imma', 'rn', 'ngl', 'smdh', 'tia', 'tmi', 'af', 'cwot', 'fb', 'hth', 'id', 'ik', 'ilu', 'iirc', 'ily2', 'ilyb', 'im', 'kit', 'kwim', 'llap', 'mgiwjsdcmoa', 'nrn', 'om', 'omfg', 'pita', 'ppl', 're', 'sus', 'tks', 'tldr', 'tmb', 'tq', 'tqvm', 'tyvm', 'wb', 'wtg', 'wth']
+
+    # initialize a counter for messages that contain at least two pidgin words
+    abbrev_count = 0    
+    # loop through each message and check for pidgin words
+    for message in df['Message']:
+        # convert message to lowercase to make the search case-insensitive
+        message_lower = str(message).lower()
+        # loop through each pidgin word and count if it appears in the message
+        for word in common_abbreviations:
+            if word in message_lower:
+                abbrev_count += 1
+        # if at least two pidgin words are found, increment the count
+    # calculate the percentage of messages that contain at least two pidgin words
+    abbrev_percent = abbrev_count / len(df) * 100
+    # calculate the percentage of messages that do not contain at least two pidgin words
+    non_abbrev_percent = 100 - abbrev_percent
+    # create a pie chart showing the percentage of messages with at least two pidgin words
+    fig = go.Figure(data=[go.Pie(labels=['Messages containing abbrievations', 'Messages without abbrievations'], 
+                                 values=[abbrev_percent, non_abbrev_percent], hole=0.5)])
+    st.subheader('Abbrievation Extraction')
+    st.write(f"<p style='font-size:15px'>Extracts the percentage of your conversation containing abbrievations. <i>Depends on a list of {len(common_abbreviations)} words for accuracy</i></p>", unsafe_allow_html=True)
     return st.plotly_chart(fig, use_container_width=True)
 
 def collocation_extraction_by_author(data, selected_author):
     df = data
     df['Message'] = df['Message'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)))
+    df['Message'] = df['Message'].apply(remove_numbers)
+    df = df[df['Message'].apply(lambda x: len(x.split()) >= 4)]
     corpus = ' '.join(df.loc[df['Author'] == selected_author]['Message'])
+
 # Tokenize the corpus
     tokens = nltk.word_tokenize(corpus)
 # Remove stopwords
@@ -412,7 +496,16 @@ def emotions_analysis(data, selected_author):
     emotion_labels = ['anger', 'joy', 'optimism', 'sadness']
     # Define the selected author
     # Filter messages by selected author
-    author_messages = df[df['Author'] == selected_author]['Message'].tolist()
+    #df['Message'] = df['Message'].apply(remove_numbers)
+    df = df[df['Author'] == selected_author]
+    if df['Message'].count() > 500:
+        df = df[df['Message'].apply(lambda x: len(x.split()) >= 30)]
+        author_messages = df[df['Author'] == selected_author]['Message'].tolist()
+    elif df['Message'].count() >= 250 and df['Message'].count() <= 500:
+        df = df[df['Message'].apply(lambda x: len(x.split()) >= 10)]
+        author_messages = df[df['Author'] == selected_author]['Message'].tolist()
+    else:
+        author_messages = df[df['Author'] == selected_author]['Message'].tolist()
 # Predict the emotions for each message by the selected author
     emotions = []
     with st.spinner('Performing deep emotion analysis...'):
@@ -432,7 +525,7 @@ def emotions_analysis(data, selected_author):
 
     # Add title and subtitle
     fig.update_layout(title={'text': "Emotions of " + selected_author + " in WhatsApp Chat", 'y':0.9})
-    return st.plotly_chart(fig, use_container_width=True)
+    return st.plotly_chart(fig, use_container_width=True), st.write(f"<p style='font-size:18px'>This analysis is based on {df['Message'].count()} messages .</p>", unsafe_allow_html=True)
 ########################################Function declarations finished#########################################
 uploaded_file = st.file_uploader("Upload your exported WhatsApp Zip or txt Chat File", key='files')
 #click = st.button('Analyse', key="click1")
@@ -501,6 +594,10 @@ if uploaded_file is not None:
             if advanced_analysis and data1['Message'].count() < 100:
                 st.write(f"<p style='font-size:20px'> It would seem our journey ends here 😔, you don't have enough contribution to the conversation for advanced pattern and linguistic analysis</p>", unsafe_allow_html=True)
             elif advanced_analysis and data1['Message'].count() >= 100:
+                st.header('Language Analysis (Beta)')
+                percentage_of_pidgin(data, add_selectbox)
+                percentage_of_abbreviations(data, add_selectbox)
+                st.write(f"<p style='font-size:13px'><i>Language analysis relies on a manually created list of both pidgin words and abbrievations to perform inference on the conversation, it is still in beta phase as more words are being added to the list.</i></p>", unsafe_allow_html=True)
                 st.header('Collocation Extraction')
                 st.write(f"<p style='font-size:15px'>Collocation is a linguistic term used to describe the co-occurrence of two or more words in a text that tend to appear together more often than would be expected by chance. Collocation extraction involves identifying such word combinations in a corpus of text.</p>", unsafe_allow_html=True)
                 collocation_extraction_by_author(data, add_selectbox)        
@@ -509,5 +606,5 @@ if uploaded_file is not None:
                 sentiment_analysis(data, add_selectbox)
                 download_data()
                 emotions_analysis(data, add_selectbox)
-                st.write(f"<p style='font-size:18px'>This analysis is based on {data1['Message'].count()} messages .</p>", unsafe_allow_html=True)
+                st.write(f"<p style='font-size:13px'><i>Emotion analysis is a classification model and works better with long sentences. This analysis, was performed only ons entence with at least 30 word count. </i></p>", unsafe_allow_html=True)
         #st.write(f"<p style='font-size:20px'>😔 I am still working on personalized analysis, please check back </p>", unsafe_allow_html=True)
