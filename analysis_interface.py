@@ -56,7 +56,7 @@ st.set_page_config(
 )
 
 # dashboard title
-st.title('Chatistics 📈')
+st.title('Chatistics v2.3 📈')
 st.markdown("Deep Exploratory Chat Analysis")
 
 @st.cache
