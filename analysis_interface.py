@@ -388,7 +388,7 @@ def percentage_of_pidgin(data, selected_author):
     # calculate the percentage of messages that do not contain at least two pidgin words
     non_pidgin_percent = 100 - pidgin_percent
     # create a pie chart showing the percentage of messages with at least two pidgin words
-    fig = go.Figure(data=[go.Pie(labels=['Messages with at least two pidgin words', 'Messages without at least two pidgin words'], 
+    fig = go.Figure(data=[go.Pie(labels=['Pidgin Percentage', 'Non Pidgin Percentage'], 
                                  values=[pidgin_percent, non_pidgin_percent], hole=0.5)])
     st.subheader('Pidgin English Detection and Extraction')
     st.write(f"<p style='font-size:15px'>Extracts the percentage of your conversation containing pidgin english. <i>Depends on a list of {len(pidgin_words)} words for accuracy</i></p>", unsafe_allow_html=True)
@@ -417,7 +417,7 @@ def percentage_of_abbreviations(data, selected_author):
     # calculate the percentage of messages that do not contain at least two pidgin words
     non_abbrev_percent = 100 - abbrev_percent
     # create a pie chart showing the percentage of messages with at least two pidgin words
-    fig = go.Figure(data=[go.Pie(labels=['Messages containing abbrievations', 'Messages without abbrievations'], 
+    fig = go.Figure(data=[go.Pie(labels=['Abbriev Percentage', 'Non Abbriev Percentage'], 
                                  values=[abbrev_percent, non_abbrev_percent], hole=0.5)])
     st.subheader('Abbrievation Extraction')
     st.write(f"<p style='font-size:15px'>Extracts the percentage of your conversation containing abbrievations. <i>Depends on a list of {len(common_abbreviations)} words for accuracy</i></p>", unsafe_allow_html=True)
