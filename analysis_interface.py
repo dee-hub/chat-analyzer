@@ -125,7 +125,6 @@ def plot_message(data):
                  title='Top 10 Authors by Message Count')
     return st.plotly_chart(fig, use_container_width=True)
 
-@st.cache
 def download_data():
     model_name = "cardiffnlp/twitter-roberta-base-emotion"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
