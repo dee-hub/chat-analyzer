@@ -99,7 +99,10 @@ def import_chat(file):
             try:
                 date_time = pd.to_datetime(row['DateTime'], format='%d/%m/%Y, %H:%M:%S')
             except ValueError:
-                date_time = pd.to_datetime(row['DateTime'], format='%m/%d/%y, %I:%M %p')
+                try:
+                    date_time = pd.to_datetime(row['DateTime'], format='%m/%d/%y, %I:%M %p')
+                except ValueError:
+                    date_time = pd.to_datetime(row['DateTime'], format='%d/%m/%y, %I:%M:%S %p')
 
         row['Date'] = date_time.date()
         row['Time'] = date_time.time()
