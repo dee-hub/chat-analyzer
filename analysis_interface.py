@@ -216,7 +216,7 @@ def line_by_hour(data):
             try:
                 data['DateTime'] = pd.to_datetime(data['DateTime'], format='%m/%d/%y, %I:%M %p')
             except ValueError:
-                date['DateTime'] = pd.to_datetime(data['DateTime'], format='%d/%m/%Y, %I:%M:%S %p')
+                data['DateTime'] = pd.to_datetime(data['DateTime'], format='%d/%m/%Y, %I:%M:%S %p')
 # Group the messages by hour
     hourly_counts = data.groupby(data['DateTime'].dt.hour)['Message'].count().reset_index(name='Message Count')
     hourly_counts['DateTime'] = hourly_counts['DateTime'].map({0: '12AM', 1: '1AM', 2: '2AM', 3: '3AM', 4: '4AM', 5: '5AM',
